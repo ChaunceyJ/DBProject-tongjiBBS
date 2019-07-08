@@ -195,5 +195,39 @@ namespace TongJiBBS.Models
             return ht;
 
         }
+
+        public Hashtable modifyByAdmin(string user_id, string school)
+        {
+            Hashtable ht = new Hashtable();
+
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        ht.Add("enter0", "insert0");
+                        cmd.BindByName = true;
+
+                        cmd.CommandText =
+                            "update user_1 set school = :school where user_id = :user_id";
+
+                        cmd.Parameters.Add(new OracleParameter("user_id", user_id));
+                        cmd.Parameters.Add(new OracleParameter("school", school));
+
+                        cmd.ExecuteNonQuery();
+                        ht.Add("asd", "dfdf");
+                    }
+                    catch (Exception ex)
+                    {
+                        ht.Add("error", ex.Message);
+                    }
+
+                }
+            }
+            return ht;
+
+        }
     }
 }
