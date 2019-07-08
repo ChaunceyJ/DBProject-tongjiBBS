@@ -99,17 +99,17 @@ namespace TongJiBBS.Models
 
                             }
                             string txt6 = "select count(*) from post_comment where original_id = '" + i["post_id"] + "' and delete_flag = 0";
-                            Console.Write("txt6youwentu");
+                            Console.Write(txt6);
 
                             cmd.CommandText = txt6;
                             OracleDataReader reader6 = cmd.ExecuteReader();
-                            Console.Write("txt7youwentu");
                             i.Add("num_of_comment", reader6.GetInt32(0));
                             //i["num_of_comment"] = reader6.GetInt32(0);
 
-                            Console.Write("txt7youwentu");
                             //string txt7 = "select * from picture where post_id = '" + i["post_id"] + "'";
                             string txt7 = "select * from picture where post_id = '" + "p1" + "'";
+                            Console.Write(txt7);
+
                             cmd.CommandText = txt7;
                             OracleDataReader reader7 = cmd.ExecuteReader();
                             //List<string> pics = new List<string>();

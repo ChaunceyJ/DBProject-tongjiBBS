@@ -13,7 +13,7 @@ namespace TongJiBBS.Models
         private SmtpClient client;
         private string sender = "714523356@qq.com";
         private string receiver;
-        private string SMPT_Code = "dwvrpwkegogcbfjc";
+        private string SMPT_Code = "";
 
         public Hashtable send(string ID)
         {
