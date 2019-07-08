@@ -18,6 +18,14 @@ namespace TongJiBBS.Models
         private string identity;
 
         public User() { }
+
+        public User(string ID, string _password)
+        {
+            user_ID = ID;
+            password = common.md5(_password, ID);
+
+        }
+
         public User(string ID, string name, string _password)
         {
             user_ID = ID;
@@ -84,16 +92,15 @@ namespace TongJiBBS.Models
 
                             //Use the command to display employee names from 
                             // the EMPLOYEES table
-                            cmd.CommandText = "INSERT INTO USER_1( USER_ID, USER_NAME, CREDIT, PASSWORD_1) VALUES ( :_1, :_2, :_3, :_4)";
+                            cmd.CommandText = "INSERT INTO USER_1( USER_ID, USER_NAME, CREDIT, PASSWORD_1) VALUES( :ID, :name, :credit, :password)";
 
                             // Assign id to the department number 50 
 
-                            Console.Write("sucess iinsert");
 
-                            cmd.Parameters.Add(new OracleParameter(":_1", user_ID));
-                            cmd.Parameters.Add(new OracleParameter(":_2", user_name));
-                            cmd.Parameters.Add(new OracleParameter(":_3", credit));
-                            cmd.Parameters.Add(new OracleParameter(":_4", password));
+                            cmd.Parameters.Add(new OracleParameter(":ID", this.user_ID));
+                            cmd.Parameters.Add(new OracleParameter(":name", this.user_name));
+                            cmd.Parameters.Add(new OracleParameter(":credit", this.credit));
+                            cmd.Parameters.Add(new OracleParameter(":password", this.password));
 
                             cmd.ExecuteNonQuery();
 
@@ -116,6 +123,77 @@ namespace TongJiBBS.Models
                 ht.Add("reason", "verficode error");
             }
             return ht;
+        }
+
+        public Hashtable login()
+        {
+            Hashtable ht = new Hashtable();
+            //验证密码是否正确
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        //Use the command to display employee names from 
+                        // the EMPLOYEES table
+                        cmd.CommandText = "select PASSWORD_1 from USER_1 where USER_ID = :id";
+
+                        // Assign id to the department number 50 
+                        OracleParameter id = new OracleParameter("id", user_ID);
+                        cmd.Parameters.Add(id);
+
+                        //Execute the command and use DataReader to display the data
+                        OracleDataReader reader = cmd.ExecuteReader();
+                        if (reader.Read())
+                        {
+                            Console.Write('\n'+reader.GetString(0)+'\n');
+                            if(reader.GetString(0) != this.password)
+                            {
+                                ht.Add("result", "fail");
+                                ht.Add("reason", "password error");
+                            }
+                            else
+                            {
+                                //这里有问题
+                                cmd.CommandText = "select freeze_start_time, freeze_en_time from freeze where USER_ID = :ID and freeze_en_time > sysdate";
+                                OracleDataReader reader2 = cmd.ExecuteReader();
+                                if (reader2.Read())
+                                {
+                                    Console.Write('\n' + reader2.GetDateTime(0).ToString("dd/MM/yy") + '\n');
+                                    ht.Add("result", "fail");
+                                    ht.Add("reason", "freeze account");
+                                    ht.Add("start_time", reader2.GetDateTime(0).ToString("dd/MM/yy"));
+                                    ht.Add("end_time", reader2.GetDateTime(1).ToString("dd/MM/yy"));
+                                }
+                                else
+                                {
+                                    ht.Add("result", "success");
+                                    ht.Add("ID", this.user_ID);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ht.Add("result", "fail");
+                            ht.Add("reason", "ID not exist");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        //await context.Response.WriteAsync(ex.Message);
+                        ht.Add("error", ex.Message);
+                    }
+
+                }
+
+            }
+
+            return ht;
+
         }
     }
 }
