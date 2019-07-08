@@ -80,5 +80,43 @@ namespace TongJiBBS.Models
             }
             return ht;
         }
+
+        public Hashtable show_contentAdmin_list()//type为 contentAdmin
+        {
+            Hashtable ht = new Hashtable();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        cmd.CommandText = "select admin_id, portrait, name_1, section_id" +
+                            " from admin_1 natural join section where identity_1 = 'contentAdmin'";
+                        OracleDataReader reader1 = cmd.ExecuteReader();
+
+                        List<Hashtable> ls = new List<Hashtable>();
+                        while (reader1.Read())
+                        {
+                            Hashtable temp = new Hashtable();
+                            temp.Add("admin_id",reader1.GetString(0));
+                            temp.Add("portrait", reader1.GetString(1));
+                            temp.Add("name", reader1.GetString(0).Remove(0,2));
+                            temp.Add("user_id", reader1.GetString(0));//成为管理员前的用户id
+                            temp.Add("section_id", reader1.GetString(3));//所管板块
+                            ls.Add(temp);
+                        }
+                        ht.Add("admins", ls);
+                    }
+                    catch (Exception ex)
+                    {
+                        ht.Add("error", ex.Message);
+                    }
+                }
+            }
+            return ht;
+        }
     }
 }

@@ -16,7 +16,21 @@ namespace TongJiBBS.Controllers
         public string Send(string sender_id, string receiver_id, string content)
         {
             private_letter pl= new private_letter();
-          Hashtable ht = pl.insert_letter(sender_id, receiver_id, content);
+            Hashtable ht = pl.insert_letter(sender_id, receiver_id, content);
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            string strJson = js.Serialize(ht);
+            return strJson;
+        }
+    }
+
+    [Route("api/[controller]")]
+    public class get_letterController : Controller
+    {
+        [HttpPost]
+        public string Send(string user_id, string target_id)
+        {
+            private_letter pl = new private_letter();
+            Hashtable ht = pl.get_letter(user_id, target_id);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
@@ -34,6 +48,6 @@ namespace TongJiBBS.Controllers
         }
     }
 
-    
-   
+
+
 }

@@ -21,38 +21,16 @@ namespace TongJiBBS.Controllers
             string strJson = js.Serialize(ht);
             return strJson;
         }
-
-        [HttpGet]
-        public string get()
-        {
-
-            Hashtable ht = new Hashtable();
-            ht.Add("dsofodsfnoisnfoie", "3fdsvsdfdf");
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return strJson;
-        }
     }
 
     [Route("api/[controller]")]
     public class modify_profile_by_superController : Controller
     {
         [HttpPost]
-        public string modify_profile_by_super(string admin_id, string selected_id)
+        public string modify_profile_by_super(string user_id, string school)
         {
-            Admin ad = new Admin();
-            Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return strJson;
-        }
-
-        [HttpGet]
-        public string get()
-        {
-
-            Hashtable ht = new Hashtable();
-            ht.Add("dsofodsfnoisnfoie", "3fdsvsdfdf");
+            User u = new User();
+            Hashtable ht = u.modifyByAdmin(user_id, school);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
@@ -63,21 +41,10 @@ namespace TongJiBBS.Controllers
     public class get_report_listController : Controller
     {
         [HttpPost]
-        public string modify_profile_by_super(string admin_id, string selected_id)
+        public string get_report_list(string admin_id)
         {
-            Admin ad = new Admin();
-            Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return strJson;
-        }
-
-        [HttpGet]
-        public string get()
-        {
-
-            Hashtable ht = new Hashtable();
-            ht.Add("dsofodsfnoisnfoie", "3fdsvsdfdf");
+            Report rp = new Report();
+            Hashtable ht = rp.getReportList(admin_id);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
@@ -88,21 +55,10 @@ namespace TongJiBBS.Controllers
     public class show_contentAdmin_listController : Controller
     {
         [HttpPost]
-        public string modify_profile_by_super(string admin_id, string selected_id)
+        public string show_contentAdmin_list()
         {
             Admin ad = new Admin();
-            Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return strJson;
-        }
-
-        [HttpGet]
-        public string get()
-        {
-
-            Hashtable ht = new Hashtable();
-            ht.Add("dsofodsfnoisnfoie", "3fdsvsdfdf");
+            Hashtable ht = ad.show_contentAdmin_list();
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
@@ -110,24 +66,13 @@ namespace TongJiBBS.Controllers
     }
 
     [Route("api/[controller]")]
-    public class admin_delAdmin_listController : Controller
+    public class admin_delController : Controller
     {
         [HttpPost]
-        public string modify_profile_by_super(string admin_id, string selected_id)
+        public string admin_del(string admin_id, string selected_id)
         {
             Admin ad = new Admin();
             Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return strJson;
-        }
-
-        [HttpGet]
-        public string get()
-        {
-
-            Hashtable ht = new Hashtable();
-            ht.Add("dsofodsfnoisnfoie", "3fdsvsdfdf");
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
@@ -138,21 +83,10 @@ namespace TongJiBBS.Controllers
     public class show_user_profile_for_superAdminController : Controller
     {
         [HttpPost]
-        public string modify_profile_by_super(string admin_id, string selected_id)
+        public string show_user_profile_for_superAdmin(string admin_id, string selected_id)
         {
             Admin ad = new Admin();
             Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return strJson;
-        }
-
-        [HttpGet]
-        public string get()
-        {
-
-            Hashtable ht = new Hashtable();
-            ht.Add("dsofodsfnoisnfoie", "3fdsvsdfdf");
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
