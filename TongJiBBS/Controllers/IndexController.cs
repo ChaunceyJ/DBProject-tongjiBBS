@@ -63,4 +63,23 @@ namespace TongJiBBS.Controllers
         }
 
     }
+
+    [Route("api/[controller]")]
+    public class Show_postController : Controller
+    {
+
+        // POST api/<controller>
+        [HttpPost]
+        public string Post(string id, string section_id)
+        {
+            Post Posts = new Post(section_id, id);
+            List<Hashtable> reslut = Posts.getAllPost_30();
+           // Hashtable ht = new Hashtable();
+
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            string strJson = js.Serialize(reslut);
+            return strJson;
+        }
+
+    }
 }
