@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using TongJiBBS.Models;
 using System.Collections;
 using System.Web.Script.Serialization;
-
+using Microsoft.AspNetCore.Cors;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TongJiBBS.Controllers
 {
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class RegisterController : Controller
     {
@@ -28,19 +29,19 @@ namespace TongJiBBS.Controllers
         }
 
     }
-
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class Send_verificationController : Controller
     {
         // GET api/<controller>/5
         [HttpGet("{id}")]
-        public string Get(string id)
+        public ActionResult Get(string id)
         {
             sendEmail sE = new sendEmail();
             Hashtable ht = sE.send(id);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
-            return strJson;
+            return Json(ht);
         }
 
         

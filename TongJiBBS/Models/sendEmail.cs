@@ -25,7 +25,7 @@ namespace TongJiBBS.Models
             string verfi_code = iRdm.ToString();
 
             Hashtable ht = new Hashtable();
-
+            ht.Add("code", verfi_code);
             using (OracleConnection con = new OracleConnection(common.conString))
             {
                 using (OracleCommand cmd = con.CreateCommand())

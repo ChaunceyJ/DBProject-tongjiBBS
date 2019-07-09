@@ -65,28 +65,40 @@ namespace TongJiBBS.Controllers
         }
     }
 
-    [Route("api/[controller]")]
-    public class admin_delController : Controller
-    {
-        [HttpPost]
-        public string admin_del(string admin_id, string selected_id)
-        {
-            Admin ad = new Admin();
-            Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return strJson;
-        }
-    }
+    //[Route("api/[controller]")]
+    //public class admin_delController : Controller
+    //{
+    //    [HttpPost]
+    //    public string admin_del(string admin_id, string selected_id)
+    //    {
+    //        //Admin ad = new Admin();
+    //        //Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
+    //        //JavaScriptSerializer js = new JavaScriptSerializer();
+    //        //string strJson = js.Serialize(ht);
+    //        //return strJson;
+    //    }
+    //}
 
     [Route("api/[controller]")]
     public class show_user_profile_for_superAdminController : Controller
     {
-        [HttpPost]
-        public string show_user_profile_for_superAdmin(string admin_id, string selected_id)
+        [HttpGet]
+        //查看全部用户
+        public string show_user_profile_for_superAdmin()
         {
-            Admin ad = new Admin();
-            Hashtable ht = ad.appointNewAdmin(admin_id, selected_id);
+            User u = new User();
+            Hashtable ht = u.showAllUserProfileForSuperAdmin();
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            string strJson = js.Serialize(ht);
+            return strJson;
+        }
+
+        [HttpGet("{user_id}")]
+        //查看特定用户
+        public string show_user_profile_for_superAdmin(string user_id)
+        {
+            User u = new User();
+            Hashtable ht = u.showOneUserProfileForSuperAdmin(user_id);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;

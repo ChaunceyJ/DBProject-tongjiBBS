@@ -82,26 +82,50 @@ namespace TongJiBBS.Models
                         cmd.Parameters.Add(new OracleParameter("target_id", target_id));
 
                         OracleDataReader reader = cmd.ExecuteReader();
-                        string letter_read_id="0";
+                        //string letter_read_id="0";
+                        List<Hashtable> ls = new List<Hashtable>();
                         while (reader.Read())
                         {
-                            letter_read_id = reader.GetString(0);
-                            ht.Add("time", reader.GetDateTime(1).ToString());
-                            ht.Add("content", reader.GetString(2));
+                            Hashtable temp = new Hashtable();
+                            string letter_read_id = reader.GetString(0);
+                            //标记已读
+                            setReadFlag(letter_read_id);
+
+                            temp.Add("time", reader.GetDateTime(1).ToString());
+                            temp.Add("content", reader.GetString(2));
+                            ls.Add(temp);
                         }
-                        //标记已读
-                        cmd.CommandText = "update private_letter set read_flag=1 where letter_id = :letter_id";
-
-                        cmd.Parameters.Add(new OracleParameter("letter_id", letter_read_id));
-
-                        cmd.ExecuteNonQuery();
-
+                        ht.Add("letters", ls);
                     }
                     catch (Exception ex)
                     {
                         ht.Add("error", ex.Message);
                     }
+                }
+            }
+            return ht;
+        }
 
+        public Hashtable setReadFlag(string letter_id)
+        {
+            Hashtable ht = new Hashtable();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        cmd.CommandText = "update private_letter set read_flag=1 where letter_id = :letter_id";
+                        cmd.Parameters.Add(new OracleParameter("letter_id", letter_id));
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        ht.Add("error", ex.Message);
+                    }
                 }
             }
             return ht;

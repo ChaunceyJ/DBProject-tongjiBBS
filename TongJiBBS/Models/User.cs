@@ -196,6 +196,7 @@ namespace TongJiBBS.Models
 
         }
 
+        //管理员修改用户学院信息
         public Hashtable modifyByAdmin(string user_id, string school)
         {
             Hashtable ht = new Hashtable();
@@ -228,6 +229,86 @@ namespace TongJiBBS.Models
             }
             return ht;
 
+        }
+
+        //查看特定用户
+        public Hashtable showOneUserProfileForSuperAdmin(string user_id)
+        {
+            Hashtable ht = new Hashtable();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+                        //user_id, name, credit, password, portrait, school, identity
+                        cmd.CommandText =
+                            "select * from user_1 where user_id = :user_id";
+                        cmd.Parameters.Add(new OracleParameter("user_id", user_id));
+                        OracleDataReader rd = cmd.ExecuteReader();
+                        while (rd.Read())
+                        {
+                            ht.Add("user_id", rd.GetString(0));
+                            ht.Add("name", rd.GetString(1));
+                            ht.Add("credit", rd.GetInt32(2));
+                            ht.Add("password", rd.GetString(3));
+                            ht.Add("portrait", rd.GetString(4));
+                            ht.Add("school", rd.GetString(5));
+                            ht.Add("identity", rd.GetString(6));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ht.Add("error", ex.Message);
+                    }
+
+                }
+            }
+            return ht;
+        }
+    
+
+        //查看所有用户
+        public Hashtable showAllUserProfileForSuperAdmin()
+        {
+            Hashtable ht = new Hashtable();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        ht.Add("enter0", "insert0");
+                        cmd.BindByName = true;
+                        //user_id, name, credit, password, portrait, school, identity
+                        cmd.CommandText =
+                            "select * from user_1";
+                        OracleDataReader rd = cmd.ExecuteReader();
+                        List<Hashtable> ls = new List<Hashtable>();
+                        while(rd.Read())
+                        {
+                            Hashtable temp = new Hashtable();
+                            temp.Add("user_id", rd.GetString(0));
+                            temp.Add("name", rd.GetString(1));
+                            temp.Add("credit", rd.GetInt32(2));
+                            temp.Add("password", rd.GetString(3));
+                            temp.Add("portrait", rd.GetString(4));
+                            temp.Add("school", rd.GetString(5));
+                            temp.Add("identity", rd.GetString(6));
+                            ls.Add(temp);
+                        }
+                        ht.Add("users", ls);
+                    }
+                    catch (Exception ex)
+                    {
+                        ht.Add("error", ex.Message);
+                    }
+                }
+            }
+            return ht;
         }
     }
 }
