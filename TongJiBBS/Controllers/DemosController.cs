@@ -15,13 +15,13 @@ namespace TongJiBBS.Controllers
     {
         // GET: api/Todo
         [HttpGet]
-        public string Get()
+        public ActionResult Get()
         {
             Demo me = new Demo();
             Hashtable ht = me.get_name();
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
-            return strJson;
+            return Json(ht);
         }
     }
 
