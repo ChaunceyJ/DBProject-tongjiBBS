@@ -11,22 +11,25 @@ namespace TongJiBBS.Models
     public class post
     {
         private string post_id;
-        private string user_id;
         private string section_id;
         private string time_1;
         private string title;
         private int delete_flag;
         private string content_1;
         private string forward_from_id;
-        public int credit = 0;
         public string credit1;
         public string author;
+        string actor;
+        string content;
         int num1;
         int num2;
         int num3;
         int num4;
         int num5;
         int num6;
+        int num7;
+        int num8;
+        int num9;
         string actor_id;
         int attitude;
         string name1;
@@ -34,18 +37,16 @@ namespace TongJiBBS.Models
         string name3;
         public Hashtable Post(string user_id, string section_id, string title, string content_1)
         {
+            int credit;
             Hashtable ht = new Hashtable();
-
             //section_id = section_id1;
             //title = title1;
             //content_1 = content;
-
-
             Random ran = new Random();
             post_id = DateTime.Now.ToString("yyMMddHHmmss") + ran.Next(0, 999).ToString();
 
             delete_flag = 0;
-            forward_from_id = "1";
+            forward_from_id = "";
             using (OracleConnection con = new OracleConnection(common.conString))
             {
                 using (OracleCommand cmd = con.CreateCommand())
@@ -55,11 +56,10 @@ namespace TongJiBBS.Models
                         con.Open();
                         cmd.BindByName = true;
 
-                        cmd.CommandText = "INSERT INTO POST " +
+                        cmd.CommandText = "INSERT INTO POST (post_id, user_id, section_id, time_1, title, delete_flag, content_1, forward_from_id)" +
                             "values(:a1, :a2, :a3, " +
                             "to_date(to_char(sysdate,'YYYY-MM-DD HH24:MI:SS'),'yyyy-mm-dd hh24:mi:ss')," +
                             ":a5, :a6, :a7, :a8)";
-
                         cmd.Parameters.Add(new OracleParameter("a1", post_id));
                         cmd.Parameters.Add(new OracleParameter("a2", user_id));
                         cmd.Parameters.Add(new OracleParameter("a3", section_id));
@@ -67,10 +67,17 @@ namespace TongJiBBS.Models
                         cmd.Parameters.Add(new OracleParameter("a6", delete_flag));
                         cmd.Parameters.Add(new OracleParameter("a7", content_1));
                         cmd.Parameters.Add(new OracleParameter("a8", forward_from_id));
-                 
                         cmd.ExecuteNonQuery();
                         ht.Add("result", "success");
-                        credit = credit + 5;
+                        cmd.CommandText = " SELECT  COUNT(*) FROM POST WHERE user_id= :user_id";
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.Add(new OracleParameter(":user_id",user_id));
+                        OracleDataReader reader8 = cmd.ExecuteReader();
+                        while (reader8.Read())
+                        {
+                            num8 = reader8.GetInt32(0);
+                        }
+                        credit = 20 + 5 * num8;
                         credit1 = credit.ToString();
                         ht.Add("credit", credit1);
                     }
@@ -86,7 +93,6 @@ namespace TongJiBBS.Models
         public Hashtable Del_post(string user_id, string post_id)
         {
             Hashtable ht = new Hashtable();
-         
             using (OracleConnection con = new OracleConnection(common.conString))
             {
                 using (OracleCommand cmd = con.CreateCommand())
@@ -132,9 +138,6 @@ namespace TongJiBBS.Models
 
             return ht;
         }
-
-
-
         public Hashtable Forward(string user_id, string post_id)
         {
             Hashtable ht = new Hashtable();
@@ -147,7 +150,6 @@ namespace TongJiBBS.Models
                     try
                     {
                         con.Open();
-                      
                         cmd.CommandText = " SELECT  section_id, title,content_1 FROM POST WHERE POST_ID = :post_id";
                         cmd.Parameters.Add(new OracleParameter("post_id", post_id));
                         OracleDataReader reader2 = cmd.ExecuteReader();
@@ -159,30 +161,21 @@ namespace TongJiBBS.Models
                         }
                         Random ran = new Random();
                         post_id = DateTime.Now.ToString("yyMMddHHmmss") + ran.Next(0, 999).ToString();
-                        cmd.CommandText = "INSERT INTO POST (post_id,user_id,section_id,time_1,title,delete_flag,content_1,forward_from_id)" +
+                        cmd.CommandText = "INSERT INTO POST " +
                       "values(:a1, :a2, :a3, " +
                       "to_date(to_char(sysdate,'YYYY-MM-DD HH24:MI:SS'),'yyyy-mm-dd hh24:mi:ss')," +
                       ":a5, :a6, :a7, :a8)";
                         cmd.Parameters.Clear();
                         cmd.Parameters.Add(new OracleParameter("a1", post_id ));
-                        cmd.Parameters.Clear();
                         cmd.Parameters.Add(new OracleParameter("a2", user_id));
-                        cmd.Parameters.Clear();
                         cmd.Parameters.Add(new OracleParameter("a3", section_id));
-                        cmd.Parameters.Clear();
                         cmd.Parameters.Add(new OracleParameter("a5", title));
-                        cmd.Parameters.Clear();
-                        cmd.Parameters.Add(new OracleParameter("a6", 0));
-                        cmd.Parameters.Clear();
+                        cmd.Parameters.Add(new OracleParameter("a6", delete_flag));
                         cmd.Parameters.Add(new OracleParameter("a7", content_1));
-                        cmd.Parameters.Clear();
                         cmd.Parameters.Add(new OracleParameter("a8", forward_from_id));
                         ht.Add("result0", "success0");
                         cmd.ExecuteNonQuery();
                         ht.Add("result", "success");
-
-
-
                     }
                     catch (Exception ex)
                     {
@@ -198,6 +191,7 @@ namespace TongJiBBS.Models
         public Hashtable All(string post_id)
         {
             Hashtable ht = new Hashtable();
+            string user_id="";
             using (OracleConnection con = new OracleConnection(common.conString))
             {
                 using (OracleCommand cmd = con.CreateCommand())
@@ -279,12 +273,21 @@ namespace TongJiBBS.Models
                             num6 = reader9.GetInt32(0);
                         }
                         ht.Add("作者关注的人数", num6);
+                        cmd.CommandText = " SELECT actor_id, content_1 from post_comment where original_id = :post_id";
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.Add(new OracleParameter("post_id", post_id));
+                        OracleDataReader reader10 = cmd.ExecuteReader();
+                        List<Hashtable> ls = new List<Hashtable>();
+                        while (reader10.Read())
+                        {
+                            Hashtable temp = new Hashtable();
+                            temp.Add("actor_id", reader10.GetString(0));
+                            temp.Add("content",reader10.GetString(1));
+                            ls.Add(temp);
+                        }
+                        ht.Add("评论内容", ls);
+                  
                     }
-
-
-
-
-
                     catch (Exception ex)
                     {
                         //await context.Response.WriteAsync(ex.Message);

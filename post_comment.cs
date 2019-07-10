@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 using Oracle.ManagedDataAccess.Client;
 using System.Collections;
-
-
-
 namespace TongJiBBS.Models
 {
-    
-    
         public class post_comment
         {
              string comment_id;

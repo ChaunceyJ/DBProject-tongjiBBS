@@ -6,23 +6,25 @@ using Microsoft.AspNetCore.Mvc;
 using TongJiBBS.Models;
 using System.Collections;
 using System.Web.Script.Serialization;
+using Microsoft.AspNetCore.Cors;
 namespace TongJiBBS.Controllers
-{
+{  
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class postController : Controller
     {
         // GET api/post
         [HttpGet]
-        public string post(string id, string section_id, string title, string content_1)
+        public string post(string user_id, string section_id, string title, string content_1)
         {
             post post1 = new post();
-            Hashtable ht = post1.Post(id, section_id, title, content_1);
+            Hashtable ht = post1.Post(user_id, section_id, title, content_1);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
         }
     }
-
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class del_postController : Controller
     {
@@ -37,6 +39,7 @@ namespace TongJiBBS.Controllers
             return strJson;
         }
     }
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class forwardController : Controller
     {
@@ -51,6 +54,7 @@ namespace TongJiBBS.Controllers
             return strJson;
         }
     }
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class allController : Controller
     {
