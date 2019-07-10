@@ -13,7 +13,7 @@ namespace TongJiBBS.Models
         private string user_name;
         private int credit;//信誉积分
         private string password;
-        private string potrall;
+        private string portrait;
         private string school;
         private string identity;
 
@@ -34,6 +34,41 @@ namespace TongJiBBS.Models
             credit = 20;
             //school = _school;
             //identity = _identity;
+        }
+
+        private string getPortrait()
+        {
+            
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        //Use the command to display employee names from 
+                        // the EMPLOYEES table
+                        cmd.CommandText = "select potrait from USER_1 where USER_ID = '" + this.user_ID + "'";
+
+                        OracleDataReader reader0 = cmd.ExecuteReader();
+                        if (reader0.Read())
+                        {
+                            this.portrait = reader0.GetString(0);
+                        }
+             
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Write(ex.Message);
+
+                    }
+
+                }
+
+            }
+            return this.portrait;
         }
 
         public Hashtable signUp(string verficode)
@@ -105,6 +140,9 @@ namespace TongJiBBS.Models
                             cmd.ExecuteNonQuery();
 
                             ht.Add("result", "success");
+                            ht.Add("portrait", this.getPortrait());
+                            ht.Add("name", this.user_name);
+                            ht.Add("ID", this.user_ID);
                         }
                         catch (Exception ex)
                         {
@@ -173,6 +211,8 @@ namespace TongJiBBS.Models
                                 {
                                     ht.Add("result", "success");
                                     ht.Add("ID", this.user_ID);
+                                    ht.Add("portrait", this.getPortrait());
+                                    ht.Add("name", this.user_name);
                                 }
                             }
                         }
@@ -192,6 +232,7 @@ namespace TongJiBBS.Models
 
             }
 
+            ht.Add("id", this.user_ID);
             return ht;
 
         }

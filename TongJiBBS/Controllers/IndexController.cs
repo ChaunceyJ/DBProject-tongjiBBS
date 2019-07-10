@@ -128,8 +128,6 @@ namespace TongJiBBS.Controllers
     {
 
         // POST api/<controller>
-        //type == 1 -> attitude; type == 2 -> comment
-        //read = 0<>
         [HttpPost]
         public string Post(string id)
         {

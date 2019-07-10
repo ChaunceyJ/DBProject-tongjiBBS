@@ -71,15 +71,16 @@ namespace TongJiBBS.Models
                             posts[posts.Count-1].Add("time", reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"));
                             posts[posts.Count-1].Add("title", reader.GetString(3));
                             posts[posts.Count-1].Add("content", reader.GetString(4));
-                            posts[posts.Count - 1].Add("forward_from", reader.GetString(5));
-                            posts[posts.Count-1].Add("num_of_like", 0);
-                            posts[posts.Count-1].Add("num_of_dislike", 0);
-                            posts[posts.Count-1].Add("num_of_favor", 0);
+                            posts[posts.Count-1].Add("forward_from", reader.GetString(5));
+                            //posts[posts.Count-1].Add("num_of_like", 0);
+                            //posts[posts.Count-1].Add("num_of_dislike", 0);
+                            //posts[posts.Count-1].Add("num_of_favor", 0);
                             //posts[posts.Count-1].Add("num_of_comment", 0);
                         }
 
                         foreach (Hashtable i in posts)
                         {
+                            /*
                             string txt5 = "select attitude_type, count(*) from post_attitude where post_id = '" + i["post_id"] + "' group by attitude_type";
                             cmd.CommandText = txt5;
                             OracleDataReader reader5 = cmd.ExecuteReader();
@@ -113,10 +114,10 @@ namespace TongJiBBS.Models
                             {
                                 i.Add("num_of_comment", 0);
 
-                            }
+                            }*/
                             //i["num_of_comment"] = reader6.GetInt32(0);
 
-                            string txt7 = "select * from picture where post_id = '" + i["post_id"] + "'";
+                            string txt7 = "select picture_id from picture where post_id = '" + i["post_id"] + "'";
                             //string txt7 = "select * from picture where post_id = '" + "p1" + "'";
                             Console.Write(txt7);
 
@@ -125,7 +126,7 @@ namespace TongJiBBS.Models
                             //List<string> pics = new List<string>();
                             if (reader7.Read())
                             {
-                                i.Add("picture",reader7.GetString(1));
+                                i.Add("picture",reader7.GetString(0));
                             }
                             //i.Add("picture", pics);
                             string txt8 = "select POTRAIT from USER_1 where User_id = '" + i["user_id"] + "'";
@@ -198,22 +199,17 @@ namespace TongJiBBS.Models
                             posts[posts.Count - 1].Add("time", reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"));
                             posts[posts.Count - 1].Add("title", reader.GetString(3));
                             posts[posts.Count - 1].Add("content", reader.GetString(4));
-                            if (reader.IsDBNull(5))
-                            {
-                                posts[posts.Count - 1].Add("forward_from", null);
-                            }
-                            else
-                            {
-                                posts[posts.Count - 1].Add("forward_from", reader.GetString(5));
-                            }
-                            posts[posts.Count - 1].Add("num_of_like", 0);
+                            posts[posts.Count - 1].Add("forward_from", reader.GetString(5));
+                            
+                           /* posts[posts.Count - 1].Add("num_of_like", 0);
                             posts[posts.Count - 1].Add("num_of_dislike", 0);
                             posts[posts.Count - 1].Add("num_of_favor", 0);
-                            //posts[posts.Count-1].Add("num_of_comment", 0);
+                            //posts[posts.Count-1].Add("num_of_comment", 0);*/
                         }
 
                         foreach (Hashtable i in posts)
                         {
+                            /*
                             string txt5 = "select attitude_type, count(*) from post_attitude where post_id = '" + i["post_id"] + "' group by attitude_type";
                             cmd.CommandText = txt5;
                             OracleDataReader reader5 = cmd.ExecuteReader();
@@ -249,7 +245,7 @@ namespace TongJiBBS.Models
 
                             }
                             //i["num_of_comment"] = reader6.GetInt32(0);
-
+                            */
                             string txt7 = "select * from picture where post_id = '" + i["post_id"] + "'";
                             //string txt7 = "select * from picture where post_id = '" + "p1" + "'";
                             Console.Write(txt7);
@@ -261,6 +257,10 @@ namespace TongJiBBS.Models
                             {
                                 i.Add("picture", reader7.GetString(1));
                             }
+                            else
+                            {
+                                i.Add("picture", null);
+                            }
                             //i.Add("picture", pics);
                             string txt8 = "select POTRAIT from USER_1 where User_id = '" + i["user_id"] + "'";
 
@@ -269,14 +269,8 @@ namespace TongJiBBS.Models
                             //List<string> pics = new List<string>();
                             if (reader8.Read())
                             {
-                                if (reader8.IsDBNull(0))
-                                {
-                                    i.Add("potrait", null);
-                                }
-                                else
-                                {
-                                    i.Add("potrait", reader8.GetString(0));
-                                }
+                                i.Add("potrait", reader8.GetString(0));
+                                
                                 
                             }
                         }
