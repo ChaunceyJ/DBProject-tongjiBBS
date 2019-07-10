@@ -191,7 +191,7 @@ namespace TongJiBBS.Models
                         OracleDataReader reader = cmd.ExecuteReader();
 
 
-                        while (reader.Read() && posts.Count <= 30)
+                        while (reader.Read() && posts.Count <= 28)
                         {
                             posts.Add(new Hashtable());
                             posts[posts.Count - 1].Add("post_id", reader.GetString(0));

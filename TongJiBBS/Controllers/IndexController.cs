@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Cors;
 
 namespace TongJiBBS.Controllers
 {
-    [EnableCors("Domain")]
+    //[EnableCors("Domain")]
     [Route("api/[controller]")]
     public class RegisterController : Controller
     {
@@ -29,7 +29,7 @@ namespace TongJiBBS.Controllers
         }
 
     }
-    [EnableCors("Domain")]
+    //[EnableCors("Domain")]
     [Route("api/[controller]")]
     public class Send_verificationController : Controller
     {

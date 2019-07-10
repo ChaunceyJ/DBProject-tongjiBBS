@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TongJiBBS.Models;
+using Oracle.ManagedDataAccess.Client;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,8 +16,9 @@ namespace TongJiBBS.Controllers
     [Route("api/[controller]")]
     public class PictureController : Controller
     {
+        //type == 1 -> post; type == 2 -> portrait
         [HttpPost]
-        public ActionResult Upload(IFormCollection Files, int EntId, int CrtUser)
+        public ActionResult Upload(IFormCollection Files, string id, int type)
         {
 
             try
@@ -38,16 +41,37 @@ namespace TongJiBBS.Controllers
                     if (LimitPictureType.Contains(currentPictureExtension))
                     {
 
-                        //为了查看图片就不在重新生成文件名称了
-                        // var new_path = DateTime.Now.ToString("yyyyMMdd")+ file.FileName;
-                        var new_path = Path.Combine("uploads/images/", file.FileName);
+                        //重新生成文件名称
+                        //post -> post_id + timestamp    portrait -> user_id + timestamp
+                        var new_name = id + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        string new_path;
+                        if (type == 1)
+                        {   
+                            new_path = Path.Combine(common.src_posts, new_name);
+                        }
+                        else
+                        {
+                            new_path = Path.Combine(common.src_portrait, new_name);
+                        }
+                        
+
                         var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", new_path);
 
                         using (var stream = new FileStream(path, FileMode.Create))
                         {
 
                             //图片路径保存到数据库里面去
-                            bool flage = true;
+                            bool flage ;
+
+                            if(type == 1)
+                            {
+                                flage = insert_post_picture(new_name, id, hash);
+                            }
+                            else
+                            {
+                                flage = insert_portrait(new_name, id, hash);
+                            }
+
                             if (flage == true)
                             {
                                 //再把文件保存的文件夹中
@@ -72,8 +96,57 @@ namespace TongJiBBS.Controllers
 
         }
 
+        private bool insert_post_picture(string name, string _id, Hashtable hs)
+        {
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                
+                        cmd.CommandText = "insert into picture(post_id, picture_id) values ('" + _id + "', '" + name + "')";
 
-       
+                        cmd.ExecuteNonQuery();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        hs.Add("error", ex.Message);
+                        return false;
+                    }
+
+                }
+            }
+            return true;
+        }
+
+        private bool insert_portrait(string name, string _id, Hashtable hs)
+        {
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+
+                        cmd.CommandText = "update user_1 set potrait = '" + name + "' where user_id = '" + _id + "'";
+
+                        cmd.ExecuteNonQuery();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        hs.Add("error", ex.Message);
+                        return false;
+                    }
+
+                }
+            }
+            return true;
+        }
     }
 
    

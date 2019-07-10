@@ -6,6 +6,10 @@ namespace TongJiBBS.Models
     {
         public static string conString = "User Id=system;Password=1234;Data Source=localhost:1521/orcl;";
 
+        public static string src_portrait = "uploads/images/portrait/";
+
+        public static string src_posts = "uploads/images/posts/";
+
         //MD-5加密生成密码
         public static string md5(string password, string ID)
         {
