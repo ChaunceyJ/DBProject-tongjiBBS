@@ -13,43 +13,15 @@ namespace TongJiBBS.Models
         public Hashtable get_name()
         {
             Hashtable ht = new Hashtable();
-            using (OracleConnection con = new OracleConnection(common.conString))
-            {
-                using (OracleCommand cmd = con.CreateCommand())
-                {
-                    try
-                    {
-                        con.Open();
-                        cmd.BindByName = true;
-
-                        //Use the command to display employee names from 
-                        // the EMPLOYEES table
-                        cmd.CommandText = "select USER_NAME from USER_1 where USER_ID = :id";
-
-                        // Assign id to the department number 50 
-                        OracleParameter id = new OracleParameter("id", user_id);
-                        cmd.Parameters.Add(id);
-
-                        //Execute the command and use DataReader to display the data
-                        OracleDataReader reader = cmd.ExecuteReader();
-                        while (reader.Read())
-                        {
-                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
-                            ht.Add("name", reader.GetString(0));
-                        }
-
-                        reader.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        //await context.Response.WriteAsync(ex.Message);
-                        ht.Add("error", ex.Message);
-                    }
-                }
-
-            }
-
+            ht.Add("1", common.md5("1234", "1"));
+            ht.Add("2", common.md5("1234", "2"));
+            ht.Add("3", common.md5("1234", "3"));
+            ht.Add("4", common.md5("1234", "4"));
+            ht.Add("5", common.md5("1234", "5"));
+            ht.Add("6", common.md5("1234", "6"));
+            ht.Add("7", common.md5("1234", "7"));
             return ht;
         }
+
     }
 }

@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using TongJiBBS.Models;
 using System.Collections;
 using System.Web.Script.Serialization;
-
+using Microsoft.AspNetCore.Cors;
 namespace TongJiBBS.Controllers
 {
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class reportController : Controller
     {

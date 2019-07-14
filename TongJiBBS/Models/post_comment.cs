@@ -77,8 +77,7 @@ namespace TongJiBBS.Models
                         con.Open();
                         cmd.BindByName = true;
                         cmd.CommandText = "select AT_ID from POST_COMMENT where COMMENT_ID = :comment_id";
-                        OracleParameter id = new OracleParameter("comment_id", comment_id);
-                        cmd.Parameters.Add(id);
+                        cmd.Parameters.Add(new OracleParameter("comment_id", comment_id));
 
                         //Execute the command and use DataReader to display the data
                         OracleDataReader reader2 = cmd.ExecuteReader();
@@ -90,13 +89,13 @@ namespace TongJiBBS.Models
                         if (sign == user_id)
                         {
                             cmd.CommandText = "Update post_comment SET delete_flag = 1 where comment_id  = :comment_id";
-                            cmd.Parameters.Add(new OracleParameter(":coment_id", comment_id));
+                            
                             cmd.ExecuteNonQuery();
-                            ht.Add("result", "success");
+                            ht.Add("delete", "success");
                         }
                         else
                         {
-                            ht.Add("result", "fail");
+                            ht.Add("delete", "fail");
 
                         }
 

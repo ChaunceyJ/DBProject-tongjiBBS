@@ -11,18 +11,20 @@ namespace TongJiBBS.Controllers
 {
     [EnableCors("Domain")]
     [Route("api/[controller]")]
-    public class attitudeController : Controller
+    public class View_profileController : Controller
     {
-        // Post api/attitude
+        // GET: api/view_profile
         [HttpPost]
-        public string attitude(string post_id, string actor_id, int attitude_type)
+        public string Get(string user_id, string target_id)
         {
-            attitude attitude1 = new attitude();
-            Hashtable ht = attitude1.Attitude(post_id, actor_id, attitude_type);
+            User me = new User();
+            //me.user_id = id;
+            Hashtable ht = me.get_objectorinfo(user_id,target_id);
+            //Hashtable ht2 = me.get_fans(user_id);
+            //Hashtable ht2 = me.get_fans(user_id);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
         }
     }
-
 }

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TongJiBBS.Models;
 using Oracle.ManagedDataAccess.Client;
-
+using Microsoft.AspNetCore.Cors;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TongJiBBS.Controllers
@@ -18,7 +18,7 @@ namespace TongJiBBS.Controllers
     {
         //type == 1 -> post; type == 2 -> portrait
         [HttpPost]
-        public ActionResult Upload(IFormCollection Files, string id, int type)
+        public ActionResult Upload(IFormCollection Files)
         {
 
             try
@@ -43,41 +43,20 @@ namespace TongJiBBS.Controllers
 
                         //重新生成文件名称
                         //post -> post_id + timestamp    portrait -> user_id + timestamp
-                        var new_name = id + DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                        string new_path;
-                        if (type == 1)
-                        {   
-                            new_path = Path.Combine(common.src_posts, new_name);
-                        }
-                        else
-                        {
-                            new_path = Path.Combine(common.src_portrait, new_name);
-                        }
-                        
+                        var new_name = DateTime.Now.ToString("yyyyMMddHHmmssfff")+currentPictureExtension;
+                        common.pic.Add(new_name);
+                        string new_path = Path.Combine(common.src_posts, new_name);
+
 
                         var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", new_path);
 
                         using (var stream = new FileStream(path, FileMode.Create))
                         {
 
-                            //图片路径保存到数据库里面去
-                            bool flage ;
-
-                            if(type == 1)
-                            {
-                                flage = insert_post_picture(new_name, id, hash);
-                            }
-                            else
-                            {
-                                flage = insert_portrait(new_name, id, hash);
-                            }
-
-                            if (flage == true)
-                            {
-                                //再把文件保存的文件夹中
+                            //把文件保存的文件夹中
                                 file.CopyTo(stream);
                                 hash.Add("file", "/" + new_path);
-                            }
+                            
                         }
                     }
                     else
@@ -132,7 +111,7 @@ namespace TongJiBBS.Controllers
                     {
                         con.Open();
 
-                        cmd.CommandText = "update user_1 set potrait = '" + name + "' where user_id = '" + _id + "'";
+                        cmd.CommandText = "update user_1 set portrait = '" + name + "' where user_id = '" + _id + "'";
 
                         cmd.ExecuteNonQuery();
 

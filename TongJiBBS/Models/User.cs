@@ -36,9 +36,9 @@ namespace TongJiBBS.Models
             //identity = _identity;
         }
 
-        private string getPortrait()
+        private bool getUserinfo()
         {
-            
+
             using (OracleConnection con = new OracleConnection(common.conString))
             {
                 using (OracleCommand cmd = con.CreateCommand())
@@ -50,26 +50,31 @@ namespace TongJiBBS.Models
 
                         //Use the command to display employee names from 
                         // the EMPLOYEES table
-                        cmd.CommandText = "select potrait from USER_1 where USER_ID = '" + this.user_ID + "'";
+                        cmd.CommandText = "select user_name, credit, portrait from USER_1 where USER_ID = '" + this.user_ID + "'";
 
                         OracleDataReader reader0 = cmd.ExecuteReader();
                         if (reader0.Read())
                         {
-                            this.portrait = reader0.GetString(0);
+                            this.user_name = reader0.GetString(0);
+                            this.credit = reader0.GetInt32(1);
+                            this.portrait = reader0.GetString(2);
+
                         }
-             
+
                     }
                     catch (Exception ex)
                     {
                         Console.Write(ex.Message);
-
+                        return false;
                     }
 
                 }
 
             }
-            return this.portrait;
+            return true;
         }
+
+    
 
         public Hashtable signUp(string verficode)
         {
@@ -139,10 +144,7 @@ namespace TongJiBBS.Models
 
                             cmd.ExecuteNonQuery();
 
-                            ht.Add("result", "success");
-                            ht.Add("portrait", this.getPortrait());
-                            ht.Add("name", this.user_name);
-                            ht.Add("ID", this.user_ID);
+                            
                         }
                         catch (Exception ex)
                         {
@@ -154,6 +156,13 @@ namespace TongJiBBS.Models
                     }
 
                 }
+
+                this.getUserinfo();
+                ht.Add("result", "success");
+                ht.Add("portrait", common.url_portrait(this.portrait));
+                ht.Add("name", this.user_name);
+                ht.Add("id", this.user_ID);
+
             }
             else
             {
@@ -209,10 +218,12 @@ namespace TongJiBBS.Models
                                 }
                                 else
                                 {
+                                    this.getUserinfo();
                                     ht.Add("result", "success");
-                                    ht.Add("ID", this.user_ID);
-                                    ht.Add("portrait", this.getPortrait());
+                                    ht.Add("portrait", common.url_portrait(this.portrait));
                                     ht.Add("name", this.user_name);
+                                    ht.Add("id", this.user_ID);
+
                                 }
                             }
                         }
@@ -232,7 +243,6 @@ namespace TongJiBBS.Models
 
             }
 
-            ht.Add("id", this.user_ID);
             return ht;
 
         }
@@ -350,6 +360,373 @@ namespace TongJiBBS.Models
                 }
             }
             return ht;
+        }
+
+        public Hashtable get_myinfo(string user_id)
+        {
+            Hashtable ht = new Hashtable();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        //Use the command to display employee names from 
+                        // the EMPLOYEES table
+                        cmd.CommandText = "select USER_NAME,CREDIT,portrait,SCHOOL,IDENTITY_1 from USER_1 where USER_ID = :id";
+
+                        // Assign id to the department number 50 
+                        cmd.Parameters.Add(new OracleParameter("id", user_id));
+
+                        //Execute the command and use DataReader to display the data
+                        OracleDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("name", reader.GetString(0));
+                            if(reader.GetInt16(1)==' ')
+                            {
+                                ht.Add("credit", 0);
+                            }
+                            else
+                            {
+                                ht.Add("credit", reader.GetInt16(1));
+                            }
+                            
+                            ht.Add("portrait", common.url_portrait(reader.GetString(2)));
+                            //ht.Add("portrait", reader.GetString(2));
+                            ht.Add("school", reader.GetString(3));
+                            ht.Add("identity", reader.GetString(4));
+                        }
+                        //reader.Dispose();
+
+                        cmd.CommandText = "select count(*) from USER_RELATION where ACTOR_ID =:id";
+                        OracleDataReader reader2 = cmd.ExecuteReader();
+                        cmd.Parameters.Add(new OracleParameter("id", user_id));
+                        while (reader2.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("following_number", reader2.GetInt16(0));
+                        }
+                        //reader2.Dispose();
+
+                        cmd.CommandText = "select count(*) from USER_RELATION where ACTOR_ID =:id";
+                        OracleDataReader reader3 = cmd.ExecuteReader();
+                        while (reader3.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("followed_number", reader3.GetInt16(0));
+                        }
+                        //reader3.Dispose();
+
+                        cmd.CommandText = "select count(*) from POST where USER_ID =:id";
+                        OracleDataReader reader4 = cmd.ExecuteReader();
+                        while (reader4.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("post_number", reader4.GetInt16(0));
+                        }
+                        //reader4.Dispose();
+
+                        cmd.CommandText = "select POST.POST_ID,SECTION_ID,TIME_1,TITLE,DELETE_FLAG,CONTENT_1,picture_id from POST join picture on post.post_id=picture.post_id where post.USER_ID=:id";
+                        cmd.Parameters.Add(new OracleParameter("id", user_id));
+                        OracleDataReader reader5 = cmd.ExecuteReader();
+
+                        List<Hashtable> posts = new List<Hashtable>();
+                        while (reader5.Read())
+                        {
+                            Hashtable temp = new Hashtable();
+                            temp.Add("post_id", reader5.GetString(0));
+                            temp.Add("section_id", reader5.GetString(1));
+                            temp.Add("time_1", reader5.GetDateTime(2).ToString());
+                            temp.Add("title", reader5.GetString(3));
+                            temp.Add("delete_flag", reader5.GetInt16(4));
+                            temp.Add("content_1", reader5.GetString(5));
+                            temp.Add("picture", common.url_post_pic(reader5.GetString(6)));
+                            //temp.Add("FORWORD_FROM_ID", reader.GetString(5));
+                            posts.Add(temp);
+                        }
+                        ht.Add("posts", posts);
+
+                        reader.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        //await context.Response.WriteAsync(ex.Message);
+                        ht.Add("error", ex.Message);
+                    }
+                }
+            }
+
+            return ht;
+        }
+        public Hashtable modify_info(string user_id, string user_name, string school, string portrait)
+        {
+            Hashtable ht = new Hashtable();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        //Use the command to display employee names from 
+                        // the EMPLOYEES table
+                        cmd.CommandText = "UPDATE USER_1 SET USER_NAME = :u_name, PORTRAIT= :u_portrait,SCHOOL=:u_school where USER_ID = :id";
+
+                        // Assign id to the department number 50 
+                        cmd.Parameters.Add(new OracleParameter("id", user_id));
+                        cmd.Parameters.Add(new OracleParameter("u_school", school));
+                        cmd.Parameters.Add(new OracleParameter("u_portrait", portrait));
+                        cmd.Parameters.Add(new OracleParameter("u_name", user_name));
+                        //Execute the command and use DataReader to display the data
+                        OracleDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("SUCCESS", reader.GetString(0));
+                        }
+
+                        reader.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        //await context.Response.WriteAsync(ex.Message);
+                        ht.Add("error", ex.Message);
+                    }
+                }
+
+            }
+
+            return ht;
+        }
+        public Hashtable get_objectorinfo(string user_id, string target_id)
+        {
+            Hashtable ht = new Hashtable();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        //Use the command to display employee names from 
+                        // the EMPLOYEES table
+                        cmd.CommandText = "select USER_NAME,CREDIT,portrait,SCHOOL,IDENTITY_1 from USER_1 where USER_ID = :id";
+
+                        // Assign id to the department number 50 
+                        OracleParameter id = new OracleParameter("id", target_id);
+                        cmd.Parameters.Add(id);
+
+                        //Execute the command and use DataReader to display the data
+                        OracleDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("name", reader.GetString(0));
+                            ht.Add("credit", reader.GetInt16(1));
+                            ht.Add("portrait", common.url_portrait(reader.GetString(2)));
+                            ht.Add("school", reader.GetString(3));
+                            ht.Add("identity", reader.GetString(4));
+                        }
+                        cmd.CommandText = "select count(*) from USER_RELATION where ACTOR_ID =:id";
+                        OracleDataReader reader2 = cmd.ExecuteReader();
+                        while (reader2.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("following_number", reader2.GetInt16(0));
+                        }
+                        cmd.CommandText = "select count(*) from USER_RELATION where ACTOR_ID =:id";
+
+                        OracleDataReader reader3 = cmd.ExecuteReader();
+                        while (reader3.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("followed_number", reader3.GetInt16(0));
+                        }
+                        cmd.CommandText = "select count(*) from POST where USER_ID =:id";
+
+                        OracleDataReader reader4 = cmd.ExecuteReader();
+                        while (reader4.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            ht.Add("post_number", reader4.GetInt16(0));
+                        }
+
+                        cmd.CommandText = "select count(*) from USER_RELATION where OBJECT_ID =:id and ACTOR_ID=:id_user and RELATION_TYPE= 1";
+                        cmd.Parameters.Add(new OracleParameter("id_user", user_id));
+                        OracleDataReader reader5 = cmd.ExecuteReader();
+                        while (reader5.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            if (reader5.GetInt16(0) == 1)
+                            {
+                                ht.Add("is_following", 1);
+                            }
+                            else
+                            {
+                                ht.Add("is_following", 0);
+                            }
+
+                        }
+                        cmd.CommandText = "select count(*) from USER_RELATION where OBJECT_ID =:id and ACTOR_ID=:id_user and RELATION_TYPE= 0";
+                        cmd.Parameters.Add(new OracleParameter("id_user", user_id));
+                        OracleDataReader reader6 = cmd.ExecuteReader();
+                        while (reader6.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            if (reader6.GetInt16(0) == 1)
+                            {
+                                ht.Add("is_blocked", 1);
+                            }
+                            else
+                            {
+                                ht.Add("is_blocked", 0);
+                            }
+
+                        }
+                        cmd.CommandText = "select count(*) from USER_RELATION where ACTOR_ID =:id and OBJECT_ID=:id_user and RELATION_TYPE= 1";
+                        cmd.Parameters.Add(new OracleParameter("id_user", user_id));
+                        OracleDataReader reader7 = cmd.ExecuteReader();
+                        while (reader7.Read())
+                        {
+                            //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                            if (reader7.GetInt16(0) == 1)
+                            {
+                                ht.Add("is_my_fan", "myfans");
+                            }
+                            else
+                            {
+                                ht.Add("is_my_fans", "notmyfans");
+                            }
+
+                        }
+                        cmd.CommandText = "select POST.POST_ID,SECTION_ID,TIME_1,TITLE,DELETE_FLAG,CONTENT_1,picture_id from POST join picture on post.post_id=picture.post_id where USER_ID=:id";
+                        cmd.Parameters.Add(new OracleParameter("id", user_id));
+                        OracleDataReader reader8 = cmd.ExecuteReader();
+                        List<Hashtable> posts = new List<Hashtable>();
+                        while (reader8.Read())
+                        {
+                            Hashtable temp = new Hashtable();
+                            temp.Add("post_id", reader8.GetString(0));
+                            temp.Add("section_id", reader8.GetString(1));
+                            temp.Add("time_1", reader8.GetDateTime(2).ToString());
+                            temp.Add("title", reader5.GetString(3));
+                            temp.Add("delete_flag", reader8.GetInt16(4));
+                            temp.Add("content_1", reader8.GetString(5));
+                            temp.Add("picture", common.url_post_pic(reader8.GetString(6)));
+                            //temp.Add("FORWORD_FROM_ID", reader8.GetString(5));
+                            posts.Add(temp);
+                        }
+                        ht.Add("posts", posts);
+                        reader.Dispose();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        //await context.Response.WriteAsync(ex.Message);
+                        ht.Add("error", ex.Message);
+                    }
+                }
+            }
+
+            return ht;
+
+
+        }
+        public List<Hashtable> show_collection(String user_id)
+        {
+            Hashtable ht = new Hashtable();
+            List<Hashtable> posts = new List<Hashtable>();
+            using (OracleConnection con = new OracleConnection(common.conString))
+            {
+                using (OracleCommand cmd = con.CreateCommand())
+                {
+                    try
+                    {
+                        con.Open();
+                        cmd.BindByName = true;
+
+                        //Use the command to display employee names from 
+                        // the EMPLOYEES table
+                        //cmd.CommandText = "select POST_ID,SECTION_ID,TIME_1,TITLE,DELETE_FLAG,CONTENT_1 from POST where USER_ID=:id";
+                        cmd.CommandText = "select post_id from post_attitude where actor_id=:id and attitude_type=3";
+                        // Assign id to the department number 50 
+                        cmd.Parameters.Add(new OracleParameter("id", user_id));
+
+                        //Execute the command and use DataReader to display the data
+                        OracleDataReader reader = cmd.ExecuteReader();
+                        //List<Hashtable> posts = new List<Hashtable>();
+                        while (reader.Read())
+                        {
+                            Hashtable temp = new Hashtable();
+                            temp.Add("post_id", reader.GetString(0));
+                            posts.Add(temp);
+                        }
+                        //ht.Add("posts", posts);
+                        //ht.Add("111", "222");
+                        //ht.Add("youinfo", user_id);
+                        //while (reader.Read())
+                        //{
+                        //    //await context.Response.WriteAsync("Employee First Name: " + reader.GetString(0) + "\n");
+                        //    ht.Add("post_id", reader.GetString(0));
+                        //    ht.Add("section_id", reader.GetString(1));
+                        //    ht.Add("time", reader.GetString(2));
+                        //    ht.Add("title", reader.GetString(3));
+                        //    ht.Add("flag", reader.GetInt16(4));
+                        //    ht.Add("content", reader.GetString(5));
+                        //    ht.Add("forword", reader.GetString(6));
+                        //}
+                        foreach (Hashtable i in posts)
+                        {
+                            //i["post_id"]
+                            //Hashtable temp = new Hashtable();
+                            cmd.CommandText = "select SECTION_ID,TIME_1,TITLE,DELETE_FLAG,CONTENT_1 from post where post_id=:pos";
+                            cmd.Parameters.Clear();
+                            cmd.Parameters.Add(new OracleParameter("pos", i["post_id"]));
+                            OracleDataReader reader2 = cmd.ExecuteReader();
+                            //i.Add("sss", i["post_ids"]);
+                            while (reader2.Read())
+                            {
+
+                                i.Add("section_id", reader2.GetString(0));
+                                i.Add("time_1", reader2.GetDateTime(1).ToString());
+                                i.Add("title", reader2.GetString(2));
+                                i.Add("delete_flag", reader2.GetInt16(3));
+                                i.Add("content_1", reader2.GetString(4));
+                                //i.Add("pop", reader2.GetString(5));
+                               // i.Add("picture", common.url_post_pic(reader.GetString(5)));
+                            }
+                            cmd.CommandText = "select picture_id from picture where post_id=:pos";
+                            //cmd.Parameters.Add(new OracleParameter("postt", i["post_ids"]));
+                            OracleDataReader reader3 = cmd.ExecuteReader();
+                            if (reader3.Read())
+                            {
+                                i.Add("pictures", common.url_post_pic(reader3.GetString(0)));
+                            }
+                         }
+                            //reader.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        Hashtable info = new Hashtable();
+                        //wait context.Response.WriteAsync(ex.Message);
+
+                        info.Add("error", ex.Message);
+                        posts.Add(info);
+                    }
+                }
+
+            }
+            //ht.Add("111", "111");
+            return posts;
         }
     }
 }

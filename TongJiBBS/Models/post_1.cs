@@ -11,7 +11,7 @@ namespace TongJiBBS.Models
     {
         private string section_id;
         private string user_id;
-        
+
         public Post() { }
         public Post(string _section = "00", string _user_id = "00")
         {
@@ -33,7 +33,7 @@ namespace TongJiBBS.Models
 
                         string txt1 = "select post_id, user_id, time_1, title, content_1, forward_from_id from post where delete_flag = 0 " +
                             "and user_id not in" +
-                            "(select user_relation.object_id from user_relation where user_relation.actort_id = '" + user_id + "' and user_relation.relation_type = 2) " +
+                            "(select user_relation.object_id from user_relation where user_relation.actor_id = '" + user_id + "' and user_relation.relation_type = 2) " +
                             "and post.section_id = '" + section_id + "'order by time_1 desc";
 
                         string txt2 = "select post_id, user_id, time_1, title, content_1, forward_from_id from post where delete_flag = 0 " +
@@ -41,7 +41,7 @@ namespace TongJiBBS.Models
 
                         string txt3 = "select post_id, user_id, time_1, title, content_1, forward_from_id from post where delete_flag = 0 " +
                             "and user_id not in" +
-                            "(select user_relation.object_id from user_relation where user_relation.actort_id = '" + user_id + "' and user_relation.relation_type = 2) order by time_1 desc";
+                            "(select user_relation.object_id from user_relation where user_relation.actor_id = '" + user_id + "' and user_relation.relation_type = 2) order by time_1 desc";
 
                         string txt4 = "select post_id, user_id, time_1, title, content_1, forward_from_id from post where delete_flag = 0 order by time_1 desc";
 
@@ -49,10 +49,12 @@ namespace TongJiBBS.Models
                         {
                             cmd.CommandText = txt4;
                         }
-                        else if (user_id == "00" && section_id != "00") {
+                        else if (user_id == "00" && section_id != "00")
+                        {
                             cmd.CommandText = txt2;
                         }
-                        else if (user_id != "00" && section_id == "00") {
+                        else if (user_id != "00" && section_id == "00")
+                        {
                             cmd.CommandText = txt3;
                         }
                         else
@@ -63,30 +65,30 @@ namespace TongJiBBS.Models
                         OracleDataReader reader = cmd.ExecuteReader();
 
 
-                        while (reader.Read() && posts.Count <= 30)
+                        while (reader.Read() && posts.Count <= 27)
                         {
                             posts.Add(new Hashtable());
-                            posts[posts.Count-1].Add("post_id", reader.GetString(0));
-                            posts[posts.Count-1].Add("user_id", reader.GetString(1));//who post
-                            posts[posts.Count-1].Add("time", reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"));
-                            posts[posts.Count-1].Add("title", reader.GetString(3));
-                            posts[posts.Count-1].Add("content", reader.GetString(4));
-                            posts[posts.Count-1].Add("forward_from", reader.GetString(5));
-                            //posts[posts.Count-1].Add("num_of_like", 0);
-                            //posts[posts.Count-1].Add("num_of_dislike", 0);
-                            //posts[posts.Count-1].Add("num_of_favor", 0);
+                            posts[posts.Count - 1].Add("post_id", reader.GetString(0));
+                            posts[posts.Count - 1].Add("user_id", reader.GetString(1));//who post
+                            posts[posts.Count - 1].Add("time", reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"));
+                            posts[posts.Count - 1].Add("title", reader.GetString(3));
+                            posts[posts.Count - 1].Add("content", reader.GetString(4));
+                            posts[posts.Count - 1].Add("forward_from", reader.GetString(5));
+                            posts[posts.Count - 1].Add("num_of_like", 0);
+                            posts[posts.Count - 1].Add("num_of_dislike", 0);
+                            posts[posts.Count - 1].Add("num_of_favor", 0);
                             //posts[posts.Count-1].Add("num_of_comment", 0);
                         }
 
                         foreach (Hashtable i in posts)
                         {
-                            /*
                             string txt5 = "select attitude_type, count(*) from post_attitude where post_id = '" + i["post_id"] + "' group by attitude_type";
                             cmd.CommandText = txt5;
                             OracleDataReader reader5 = cmd.ExecuteReader();
                             while (reader5.Read())
                             {
-                                switch (reader5.GetInt32(0)) {
+                                switch (reader5.GetInt32(0))
+                                {
                                     case 1:
                                         i["num_of_like"] = reader5.GetInt32(1);
                                         break;
@@ -114,7 +116,7 @@ namespace TongJiBBS.Models
                             {
                                 i.Add("num_of_comment", 0);
 
-                            }*/
+                            }
                             //i["num_of_comment"] = reader6.GetInt32(0);
 
                             string txt7 = "select picture_id from picture where post_id = '" + i["post_id"] + "'";
@@ -126,17 +128,25 @@ namespace TongJiBBS.Models
                             //List<string> pics = new List<string>();
                             if (reader7.Read())
                             {
-                                i.Add("picture",reader7.GetString(0));
+                                i.Add("picture", common.url_post_pic( reader7.GetString(0)) );
+                            }
+                            else
+                            {
+                                i.Add("picture", common.url_post_pic("infor.JPG"));
                             }
                             //i.Add("picture", pics);
-                            string txt8 = "select POTRAIT from USER_1 where User_id = '" + i["user_id"] + "'";
+                            string txt8 = "select portrait from USER_1 where User_id = '" + i["user_id"] + "'";
 
                             cmd.CommandText = txt8;
                             OracleDataReader reader8 = cmd.ExecuteReader();
                             //List<string> pics = new List<string>();
                             if (reader8.Read())
                             {
-                                i.Add("potrait", reader8.GetString(1));
+                                i.Add("portrait",common.url_portrait( reader8.GetString(0)) );
+                            }
+                            else
+                            {
+                                i.Add("portrait", common.url_portrait("moren.JPG"));
                             }
                         }
 
@@ -145,13 +155,17 @@ namespace TongJiBBS.Models
                     {
                         //await context.Response.WriteAsync(ex.Message);
                         Hashtable hs = new Hashtable();
-                        hs.Add("error", ex.Message);
+                        //hs.Add("error", ex.Message);
+                        Console.Write(ex.Message);
                         posts.Add(hs);
                     }
 
                 }
             }
 
+            posts.Add(new Hashtable());
+            //posts[posts.Count - 1].Add("id", this.user_id);
+            //posts[posts.Count - 1].Add("sid", this.section_id);
             return posts;
         }
 
@@ -169,13 +183,13 @@ namespace TongJiBBS.Models
 
                         string txt1 = "select post_id, user_id, time_1, title, content_1, forward_from_id from post where delete_flag = 0 " +
                             "and user_id not in" +
-                            "(select user_relation.object_id from user_relation where user_relation.actort_id = '" + user_id + "' and user_relation.relation_type = 2) " +
+                            "(select user_relation.object_id from user_relation where user_relation.actor_id = '" + user_id + "' and user_relation.relation_type = 2) " +
                             "and post.section_id = '" + section_id + "'and content_1 like '%" + searchContent + "%'order by time_1 desc";
 
 
                         string txt3 = "select post_id, user_id, time_1, title, content_1, forward_from_id from post where delete_flag = 0 " +
                             "and user_id not in" +
-                            "(select user_relation.object_id from user_relation where user_relation.actort_id = '" + user_id + 
+                            "(select user_relation.object_id from user_relation where user_relation.actor_id = '" + user_id +
                             "' and user_relation.relation_type = 2) and content_1 like '%" + searchContent + "%' order by time_1 desc";
 
 
@@ -191,7 +205,7 @@ namespace TongJiBBS.Models
                         OracleDataReader reader = cmd.ExecuteReader();
 
 
-                        while (reader.Read() && posts.Count <= 28)
+                        while (reader.Read() && posts.Count <= 27)
                         {
                             posts.Add(new Hashtable());
                             posts[posts.Count - 1].Add("post_id", reader.GetString(0));
@@ -199,17 +213,22 @@ namespace TongJiBBS.Models
                             posts[posts.Count - 1].Add("time", reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"));
                             posts[posts.Count - 1].Add("title", reader.GetString(3));
                             posts[posts.Count - 1].Add("content", reader.GetString(4));
-                            posts[posts.Count - 1].Add("forward_from", reader.GetString(5));
-                            
-                           /* posts[posts.Count - 1].Add("num_of_like", 0);
+                            if (reader.IsDBNull(5))
+                            {
+                                posts[posts.Count - 1].Add("forward_from", null);
+                            }
+                            else
+                            {
+                                posts[posts.Count - 1].Add("forward_from", reader.GetString(5));
+                            }
+                            posts[posts.Count - 1].Add("num_of_like", 0);
                             posts[posts.Count - 1].Add("num_of_dislike", 0);
                             posts[posts.Count - 1].Add("num_of_favor", 0);
-                            //posts[posts.Count-1].Add("num_of_comment", 0);*/
+                            //posts[posts.Count-1].Add("num_of_comment", 0);
                         }
 
                         foreach (Hashtable i in posts)
                         {
-                            /*
                             string txt5 = "select attitude_type, count(*) from post_attitude where post_id = '" + i["post_id"] + "' group by attitude_type";
                             cmd.CommandText = txt5;
                             OracleDataReader reader5 = cmd.ExecuteReader();
@@ -245,7 +264,7 @@ namespace TongJiBBS.Models
 
                             }
                             //i["num_of_comment"] = reader6.GetInt32(0);
-                            */
+
                             string txt7 = "select * from picture where post_id = '" + i["post_id"] + "'";
                             //string txt7 = "select * from picture where post_id = '" + "p1" + "'";
                             Console.Write(txt7);
@@ -255,24 +274,28 @@ namespace TongJiBBS.Models
                             //List<string> pics = new List<string>();
                             if (reader7.Read())
                             {
-                                i.Add("picture", reader7.GetString(1));
+                                i.Add("picture", common.url_post_pic(reader7.GetString(1)));
                             }
                             else
                             {
-                                i.Add("picture", null);
+                                i.Add("picture", common.url_post_pic("infor.JPG"));
                             }
+
                             //i.Add("picture", pics);
-                            string txt8 = "select POTRAIT from USER_1 where User_id = '" + i["user_id"] + "'";
+                            string txt8 = "select portrait from USER_1 where User_id = '" + i["user_id"] + "'";
 
                             cmd.CommandText = txt8;
                             OracleDataReader reader8 = cmd.ExecuteReader();
                             //List<string> pics = new List<string>();
                             if (reader8.Read())
                             {
-                                i.Add("potrait", reader8.GetString(0));
-                                
-                                
+                                i.Add("portrait", common.url_portrait(reader8.GetString(0)));
                             }
+                            else
+                            {
+                                i.Add("portrait", common.url_post_pic("moren.JPG"));
+                            }
+
                         }
 
                     }
@@ -280,15 +303,16 @@ namespace TongJiBBS.Models
                     {
                         //await context.Response.WriteAsync(ex.Message);
                         Hashtable hs = new Hashtable();
-                        hs.Add("error", ex.Message);
+                        //hs.Add("error", ex.Message);
+                        Console.Write(ex.Message);
                         posts.Add(hs);
                     }
 
                 }
             }
 
+
             return posts;
         }
     }
-
 }

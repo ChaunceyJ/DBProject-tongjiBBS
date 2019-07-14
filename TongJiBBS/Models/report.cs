@@ -14,9 +14,10 @@ namespace TongJiBBS.Models
         private string actor_id;
         private string reason;
 
-        public Hashtable getReportList(string admin_id)
+        public List<Hashtable> getReportList(string admin_id)
         {
             Hashtable ht = new Hashtable();
+            List<Hashtable> reports = new List<Hashtable>();
             using (OracleConnection con = new OracleConnection(common.conString))
             {
                 using (OracleCommand cmd = con.CreateCommand())
@@ -26,32 +27,30 @@ namespace TongJiBBS.Models
                         con.Open();
                         cmd.BindByName = true;
 
-                        //查report
-                        cmd.CommandText = "select user_id, section_id, time_1, content_1, reason," +
-                            " title, report_time, post_id, actor_id " +
-                            " from report natural join post where delete_flag = 0 and section_id in" +
-                            "(select section_id from section where admin_id=:admin_id)";
+                        //查report 只限于该内容管理员所管理分区
+                        cmd.CommandText = "select post_id, user_id, user_name, title, content_1, counts, rr " +
+                            "from(select post_id, count(distinct actor_id) as counts, (select reason from " +
+                            "report B where B.post_id = A.post_id and rownum <= 1) as rr from report A group by " +
+                            "post_id) natural join post natural join user_1 where delete_flag = 0 and post_id in " +
+                            "(select post_id from post natural join admin_1 where admin_id =:admin_id)";
                         cmd.Parameters.Add(new OracleParameter("admin_id", admin_id));
                         OracleDataReader reader1 = cmd.ExecuteReader();
                         ht.Add("enter1", "insert1");
-                        List<Hashtable> reports = new List<Hashtable>();
+                        
                         while (reader1.Read())
                         {
                             Hashtable temp = new Hashtable();
-                            temp.Add("user_id", reader1.GetString(0));
-                            temp.Add("section_id", reader1.GetString(1));
-                            temp.Add("time_1", reader1.GetDateTime(2).ToString());
-                           
-                            temp.Add("content_1", reader1.GetString(3));
-                            temp.Add("reason", reader1.GetString(4));
-                            temp.Add("title", reader1.GetString(5));
-                            temp.Add("report_time", reader1.GetDateTime(6));
-                            temp.Add("post_id", reader1.GetString(7));
-                            temp.Add("actor_id", reader1.GetString(8));
+                            temp.Add("post_id", reader1.GetString(0));
+                            temp.Add("poster_id", reader1.GetString(1));
+                            temp.Add("poster_name", reader1.GetString(2));
+                            temp.Add("title", reader1.GetString(3));
+                            temp.Add("content", reader1.GetString(4));
+                            temp.Add("count", reader1.GetInt32(5));
+                            temp.Add("reason", reader1.GetString(6));
                             reports.Add(temp);
                         }
-                        ht.Add("status", "true");
-                        ht.Add("report_list", reports);
+                        //ht.Add("status", "1");
+                        //ht.Add("report_list", reports);
                     }
                     catch (Exception ex)
                     {
@@ -59,7 +58,7 @@ namespace TongJiBBS.Models
                     }
                 }
             }
-            return ht;
+            return reports;
         }
 
         public Hashtable sendReport(string post_id, string actor_id, string reason)
@@ -75,7 +74,7 @@ namespace TongJiBBS.Models
                         cmd.BindByName = true;
 
                         cmd.CommandText =
-                            "insert into report values(:report_id,:post_id,:actor_id,:reason)";
+                            "insert into report values(:report_id,:post_id,:actor_id,:reason,)";
                         Random ran = new Random();
                         string l_id = DateTime.Now.ToString("yyMMddHHmmss") + ran.Next(0, 999).ToString();
                         cmd.Parameters.Add(new OracleParameter("report_id", l_id));
@@ -84,10 +83,12 @@ namespace TongJiBBS.Models
                         cmd.Parameters.Add(new OracleParameter("reason", reason));
 
                         cmd.ExecuteNonQuery();
+                        ht.Add("status", "1");
                     }
                     catch (Exception ex)
                     {
                         ht.Add("error", ex.Message);
+                        ht.Add("status", "0");
                     }
                 }
             }
@@ -134,7 +135,7 @@ namespace TongJiBBS.Models
                 {
                     con.Open();
                     cmd.BindByName = true;
-                    cmd.CommandText = "select admin_id from post natural join section " +
+                    cmd.CommandText = "select admin_id from post natural join admin_1 " +
                         "where post_id=:post_id";
                     cmd.Parameters.Add(new OracleParameter("post_id", post_id));
                     OracleDataReader reader = cmd.ExecuteReader();

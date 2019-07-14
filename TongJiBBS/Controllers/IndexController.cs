@@ -11,7 +11,23 @@ using Microsoft.AspNetCore.Cors;
 
 namespace TongJiBBS.Controllers
 {
-    //[EnableCors("Domain")]
+    [EnableCors("Domain")]
+    [Route("api/[controller]")]
+    public class Send_verificationController : Controller
+    {
+        [HttpPost]
+        public ActionResult Get(string id)
+        {
+            sendEmail sE = new sendEmail();
+            Hashtable ht = sE.send(id);
+            ht.Add("f", "df");
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            string strJson = js.Serialize(ht);
+            return Json(ht);
+        }
+    }
+
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class RegisterController : Controller
     {
@@ -29,24 +45,8 @@ namespace TongJiBBS.Controllers
         }
 
     }
-    //[EnableCors("Domain")]
-    [Route("api/[controller]")]
-    public class Send_verificationController : Controller
-    {
-        // GET api/<controller>/5
-        [HttpGet("{id}")]
-        public ActionResult Get(string id)
-        {
-            sendEmail sE = new sendEmail();
-            Hashtable ht = sE.send(id);
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            string strJson = js.Serialize(ht);
-            return Json(ht);
-        }
 
-        
-
-    }
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class LoginController : Controller
     {
@@ -65,6 +65,7 @@ namespace TongJiBBS.Controllers
 
     }
 
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class Show_postController : Controller
     {
@@ -84,6 +85,7 @@ namespace TongJiBBS.Controllers
 
     }
 
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class Search_postController : Controller
     {
@@ -104,6 +106,7 @@ namespace TongJiBBS.Controllers
 
     }
 
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class Get_user_notificationController : Controller
     {
@@ -123,11 +126,14 @@ namespace TongJiBBS.Controllers
 
     }
 
+    [EnableCors("Domain")]
     [Route("api/[controller]")]
     public class Get_admin_notificationController : Controller
     {
 
         // POST api/<controller>
+        //type == 1 -> attitude; type == 2 -> comment
+        //read = 0<>
         [HttpPost]
         public string Post(string id)
         {

@@ -10,19 +10,19 @@ using Microsoft.AspNetCore.Cors;
 namespace TongJiBBS.Controllers
 {
     [EnableCors("Domain")]
-    [Route("api/[controller]")]
-    public class attitudeController : Controller
+    [Route("api/[Controller]")]
+    public class Show_user_relation_listController : Controller
     {
-        // Post api/attitude
+        // GET: api/show_user_relation_list
         [HttpPost]
-        public string attitude(string post_id, string actor_id, int attitude_type)
+        public string Get(string relation_type, string user_id,string target_id)
         {
-            attitude attitude1 = new attitude();
-            Hashtable ht = attitude1.Attitude(post_id, actor_id, attitude_type);
+            user_realation me = new user_realation();
+            //me.user_id = id;
+            List<Hashtable> ht = me.show_user_relation_list(relation_type, user_id,target_id);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
         }
     }
-
 }

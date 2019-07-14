@@ -7,22 +7,23 @@ using TongJiBBS.Models;
 using System.Collections;
 using System.Web.Script.Serialization;
 using Microsoft.AspNetCore.Cors;
+
 namespace TongJiBBS.Controllers
 {
     [EnableCors("Domain")]
     [Route("api/[controller]")]
-    public class attitudeController : Controller
+    public class Modify_profileController : Controller
     {
-        // Post api/attitude
-        [HttpPost]
-        public string attitude(string post_id, string actor_id, int attitude_type)
+        // GET: api/modify_profile
+        [HttpGet]
+        public string Get(string user_id, string user_name, string school, string portrait)
         {
-            attitude attitude1 = new attitude();
-            Hashtable ht = attitude1.Attitude(post_id, actor_id, attitude_type);
+            User me = new User();
+            //me.user_id = id;
+            Hashtable ht = me.modify_info(user_id, user_name, school, portrait);
             JavaScriptSerializer js = new JavaScriptSerializer();
             string strJson = js.Serialize(ht);
             return strJson;
         }
     }
-
 }

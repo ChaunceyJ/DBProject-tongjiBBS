@@ -59,5 +59,6 @@ namespace TongJiBBS.Controllers
         public void Delete(int id)
         {
         }
+
     }
 }
